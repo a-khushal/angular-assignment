@@ -10,15 +10,58 @@
     {{ message }}
   </button>
 
-  <div *ngIf="data.length">
-    <table style="width: 100%; border-collapse: collapse; background-color: white; table-layout: fixed; overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+  <div *ngIf="data.length" style="margin-top: 20px;">
+    <div
+      style="
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 16px;
+        gap: 12px;
+      "
+    >
+      <mat-form-field appearance="outline" style="width: 300px;">
+        <mat-label>Search</mat-label>
+        <input
+          matInput
+          type="text"
+          placeholder="Search..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          style="
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            width: 100%;
+          "
+        />
+        <mat-icon matSuffix style="color: #64748b;">search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <table
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        table-layout: fixed;
+        overflow-x: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      "
+    >
       <thead style="background-color: #f8f9fa; border-bottom: 1px solid #d1d5db;">
         <tr>
           <th
             *ngFor="let header of headers; let last = last"
             scope="col"
             [style.padding.px]="12"
-            style="text-align: center; width: 100%; padding-top: 16px; text-transform: uppercase;"
+            style="
+              text-align: center;
+              width: 100%;
+              padding-top: 16px;
+              text-transform: uppercase;
+            "
             [style.border-right]="last ? 'none' : '1px solid #e5e7eb'"
           >
             {{ header }}
@@ -27,7 +70,7 @@
       </thead>
       <tbody>
         <tr
-          *ngFor="let item of paginatedData"
+          *ngFor="let item of filteredData"
           style="border-bottom: 1px solid #e5e7eb;"
         >
           <td
@@ -35,13 +78,46 @@
             [style.padding.px]="12"
             [style.border-right]="last ? 'none' : '1px solid #e5e7eb'"
           >
-            {{ item[header] }}
+            <ng-container [ngSwitch]="header">
+              <ng-container *ngSwitchCase="'status'">
+                <span
+                  [ngStyle]="{
+                    padding: '6px 12px',
+                    'border-radius': '100px',
+                    'font-size': '12px',
+                    'font-weight': 'bold',
+                    color: '#fff',
+                    'background-color':
+                      item[header] === 'active'
+                        ? '#22c55e'
+                        : item[header] === 'pending'
+                        ? '#eab308'
+                        : item[header] === 'inactive'
+                        ? '#ef4444'
+                        : '#6b7280'
+                  }"
+                >
+                  {{ item[header] }}
+                </span>
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                {{ item[header] }}
+              </ng-container>
+            </ng-container>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px;">
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 32px;
+      "
+    >
       <button
         mat-icon-button
         color="primary"
@@ -58,12 +134,13 @@
           (click)="goToPage(i + 1)"
           [ngStyle]="{
             'background-color': currentPage === i + 1 ? '#6B7280' : '#f0f0f0',
-            'color': currentPage === i + 1 ? '#fff' : '#333',
+            color: currentPage === i + 1 ? '#fff' : '#333',
             'border-radius': '20px',
             'min-width': '36px',
-            'height': '36px',
+            height: '36px',
             'font-weight': 'bold',
-            'box-shadow': currentPage === i + 1 ? '0 2px 6px rgba(0,0,0,0.2)' : 'none'
+            'box-shadow':
+              currentPage === i + 1 ? '0 2px 6px rgba(0,0,0,0.2)' : 'none'
           }"
         >
           {{ i + 1 }}
@@ -83,4 +160,4 @@
   </div>
 </div>
 
-<router-outlet />
+<router-outlet></router-outlet>

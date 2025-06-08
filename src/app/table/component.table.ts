@@ -3,6 +3,8 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule, JsonPipe, NgIf, NgFor } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-table',
@@ -12,33 +14,23 @@ import { MatIconModule } from '@angular/material/icon';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    JsonPipe,
+    MatFormField,
+    FormsModule,
+    MatLabel,
     NgIf,
     NgFor
   ],
   templateUrl: './component.table.html',
-  styleUrls: ['./component.table.css']
+  styleUrls: ['./component.table.css'],
 })
 export class Table {
   message = 'Upload a JSON file';
   data: any[] = [];
   headers: string[] = [];
 
+  searchQuery = '';
   currentPage = 1;
   entriesPerPage = 10;
-
-  get totalPages(): number {
-    return Math.ceil(this.data.length / this.entriesPerPage);
-  }
-
-  get paginatedData(): any[] {
-    const start = (this.currentPage - 1) * this.entriesPerPage;
-    return this.data.slice(start, start + this.entriesPerPage);
-  }
-
-  get totalPagesArray(): undefined[] {
-    return Array(this.totalPages);
-  }
 
   onFileUpload(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -57,6 +49,7 @@ export class Table {
             this.headers = Object.keys(json[0]);
             this.message = `Loaded ${json.length} items`;
             this.currentPage = 1;
+            this.searchQuery = '';
           } else {
             this.data = [];
             this.headers = [];
@@ -74,6 +67,46 @@ export class Table {
     } else {
       this.message = 'Please upload a .json file';
     }
+  }
+
+  onSearchChange() {
+    this.currentPage = 1; // reset to first page on search
+  }
+
+  get filteredData(): any[] {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) return this.paginatedData;
+
+    const filtered = this.data.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(query)
+      )
+    );
+
+    const start = (this.currentPage - 1) * this.entriesPerPage;
+    return filtered.slice(start, start + this.entriesPerPage);
+  }
+
+  get paginatedData(): any[] {
+    const start = (this.currentPage - 1) * this.entriesPerPage;
+    return this.data.slice(start, start + this.entriesPerPage);
+  }
+
+  get totalPages(): number {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) return Math.ceil(this.data.length / this.entriesPerPage);
+
+    const filteredLength = this.data.filter((item) =>
+      Object.values(item).some((value) =>
+        String(value).toLowerCase().includes(query)
+      )
+    ).length;
+
+    return Math.ceil(filteredLength / this.entriesPerPage);
+  }
+
+  get totalPagesArray(): undefined[] {
+    return Array(this.totalPages);
   }
 
   goToPage(page: number) {
