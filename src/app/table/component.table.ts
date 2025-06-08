@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CommonModule, JsonPipe, NgIf, NgFor } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-table',
@@ -17,8 +18,7 @@ import { FormsModule } from '@angular/forms';
     MatFormField,
     FormsModule,
     MatLabel,
-    NgIf,
-    NgFor
+    MatInputModule
   ],
   templateUrl: './component.table.html',
   styleUrls: ['./component.table.css'],
@@ -32,12 +32,13 @@ export class Table {
   currentPage = 1;
   entriesPerPage = 10;
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   onFileUpload(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
     if (file) {
-      console.log('File selected:', file.name);
       const reader = new FileReader();
 
       reader.onload = () => {
@@ -53,7 +54,7 @@ export class Table {
           } else {
             this.data = [];
             this.headers = [];
-            this.message = 'Expected an array of objects or an array with data';
+            this.message = 'Expected an array of objects with data';
           }
         } catch (err) {
           console.error('Error parsing JSON:', err);
@@ -61,6 +62,7 @@ export class Table {
           this.headers = [];
           this.message = 'Invalid JSON';
         }
+        this.cdr.detectChanges();
       };
 
       reader.readAsText(file);
@@ -69,62 +71,54 @@ export class Table {
     }
   }
 
-  onSearchChange() {
-    this.currentPage = 1; // reset to first page on search
-  }
-
-  get filteredData(): any[] {
+  filteredData(): any[] {
     const query = this.searchQuery.toLowerCase().trim();
-    if (!query) return this.paginatedData;
+    if (!query) return this.data;
 
-    const filtered = this.data.filter((item) =>
+    return this.data.filter((item) =>
       Object.values(item).some((value) =>
         String(value).toLowerCase().includes(query)
       )
     );
-
-    const start = (this.currentPage - 1) * this.entriesPerPage;
-    return filtered.slice(start, start + this.entriesPerPage);
   }
 
-  get paginatedData(): any[] {
+  getPaginatedData(): any[] {
     const start = (this.currentPage - 1) * this.entriesPerPage;
-    return this.data.slice(start, start + this.entriesPerPage);
+    const data = this.filteredData().slice(start, start + this.entriesPerPage);
+    console.log(data)
+    return data;
   }
 
   get totalPages(): number {
-    const query = this.searchQuery.toLowerCase().trim();
-    if (!query) return Math.ceil(this.data.length / this.entriesPerPage);
-
-    const filteredLength = this.data.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(query)
-      )
-    ).length;
-
-    return Math.ceil(filteredLength / this.entriesPerPage);
+    return Math.ceil(this.filteredData().length / this.entriesPerPage);
   }
 
-  get totalPagesArray(): undefined[] {
-    return Array(this.totalPages);
+  get totalPagesArray(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.cdr.detectChanges();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.cdr.detectChanges();
+    }
   }
 
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
+      this.cdr.detectChanges();
     }
   }
 
-  previousPage() {
-    this.goToPage(this.currentPage - 1);
-  }
-
-  nextPage() {
-    this.goToPage(this.currentPage + 1);
-  }
-
-  setHoverColor(event: Event, color: string) {
-    const target = event.currentTarget as HTMLElement;
-    target.style.backgroundColor = color;
+  onSearchChange() {
+    this.currentPage = 1;
   }
 }

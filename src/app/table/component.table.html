@@ -1,10 +1,5 @@
 <div class="content">
-  <input
-    type="file"
-    hidden
-    #fileInput
-    (change)="onFileUpload($event)"
-  />
+  <input type="file" hidden #fileInput (change)="onFileUpload($event)" />
   <button mat-raised-button color="primary" (click)="fileInput.click()">
     <mat-icon class="mr-2">upload</mat-icon>
     {{ message }}
@@ -14,26 +9,25 @@
     <div
       style="
         display: flex;
-        justify-content: flex-start;
         align-items: center;
-        margin-bottom: 16px;
-        gap: 12px;
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+        padding: 10px 16px;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 420px;
       "
     >
-      <mat-form-field appearance="outline" style="width: 300px;">
+      <mat-form-field appearance="outline" style="flex: 1; margin: 0;">
         <mat-label>Search</mat-label>
         <input
           matInput
           type="text"
-          placeholder="Search..."
+          placeholder="Type to search..."
           [(ngModel)]="searchQuery"
           (ngModelChange)="onSearchChange()"
-          style="
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: 1px solid #d1d5db;
-            width: 100%;
-          "
+          style="font-size: 15px; padding: 10px 12px; border-radius: 8px;"
         />
         <mat-icon matSuffix style="color: #64748b;">search</mat-icon>
       </mat-form-field>
@@ -56,12 +50,7 @@
             *ngFor="let header of headers; let last = last"
             scope="col"
             [style.padding.px]="12"
-            style="
-              text-align: center;
-              width: 100%;
-              padding-top: 16px;
-              text-transform: uppercase;
-            "
+            style="text-align: center; padding-top: 16px; text-transform: uppercase;"
             [style.border-right]="last ? 'none' : '1px solid #e5e7eb'"
           >
             {{ header }}
@@ -70,7 +59,7 @@
       </thead>
       <tbody>
         <tr
-          *ngFor="let item of filteredData"
+          *ngFor="let item of getPaginatedData()"
           style="border-bottom: 1px solid #e5e7eb;"
         >
           <td
@@ -128,7 +117,7 @@
         <mat-icon>chevron_left</mat-icon>
       </button>
 
-      <ng-container *ngFor="let _ of totalPagesArray; let i = index">
+      <ng-container *ngFor="let page of totalPagesArray; let i = index">
         <button
           mat-button
           (click)="goToPage(i + 1)"
@@ -160,4 +149,4 @@
   </div>
 </div>
 
-<router-outlet></router-outlet>
+<router-outlet />
