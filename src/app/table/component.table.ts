@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-table',
@@ -18,7 +20,11 @@ import { MatInputModule } from '@angular/material/input';
     MatFormField,
     FormsModule,
     MatLabel,
-    MatInputModule
+    MatInputModule,
+    MatCheckboxModule,
+    MatCheckbox,
+    MatSelect,
+    MatSelectModule
   ],
   templateUrl: './component.table.html',
   styleUrls: ['./component.table.css'],
@@ -27,10 +33,12 @@ export class Table {
   message = 'Upload a JSON file';
   data: any[] = [];
   headers: string[] = [];
-
+  selectedItems: Set<any> = new Set();
   searchQuery = '';
   currentPage = 1;
   entriesPerPage = 10;
+  statusOptions = ['active', 'pending', 'inactive'];
+  selectedStatus: string = 'active';
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -120,5 +128,29 @@ export class Table {
 
   onSearchChange() {
     this.currentPage = 1;
+  }
+
+  toggleAll(checked: boolean) {
+    this.getPaginatedData().forEach(item =>
+      checked ? this.selectedItems.add(item) : this.selectedItems.delete(item)
+    );
+  }
+
+  toggleOne(item: any, checked: boolean) {
+    checked ? this.selectedItems.add(item) : this.selectedItems.delete(item);
+  }
+
+  isSelected(item: any): boolean {
+    return this.selectedItems.has(item);
+  }
+
+  isAllSelected(): boolean {
+    return this.getPaginatedData().every(item => this.selectedItems.has(item));
+  }
+
+  updateSelectedStatuses() {
+    this.selectedItems.forEach(item => {
+      item.status = this.selectedStatus;
+    });
   }
 }

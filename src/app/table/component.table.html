@@ -5,21 +5,21 @@
     {{ message }}
   </button>
 
-  <div *ngIf="data.length" style="margin-top: 20px;">
+  <div *ngIf="data.length" style="margin-top: 20px">
     <div
       style="
         display: flex;
-        align-items: center;
-        margin-bottom: 20px;
+        align-items: flex-end;
+        margin: 30px 0 20px;
         background-color: #f8f9fa;
-        padding: 10px 16px;
+        padding: 12px 16px;
         border-radius: 12px;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
         width: 100%;
         max-width: 420px;
       "
     >
-      <mat-form-field appearance="outline" style="flex: 1; margin: 0;">
+      <mat-form-field appearance="outline" style="flex: 1; margin: 0">
         <mat-label>Search</mat-label>
         <input
           matInput
@@ -27,9 +27,9 @@
           placeholder="Type to search..."
           [(ngModel)]="searchQuery"
           (ngModelChange)="onSearchChange()"
-          style="font-size: 15px; padding: 10px 12px; border-radius: 8px;"
+          style="font-size: 15px; padding: 10px 12px; border-radius: 8px"
         />
-        <mat-icon matSuffix style="color: #64748b;">search</mat-icon>
+        <mat-icon matSuffix style="color: #64748b">search</mat-icon>
       </mat-form-field>
     </div>
 
@@ -44,13 +44,25 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       "
     >
-      <thead style="background-color: #f8f9fa; border-bottom: 1px solid #d1d5db;">
+      <thead
+        style="background-color: #f8f9fa; border-bottom: 1px solid #d1d5db"
+      >
         <tr>
+          <th style="text-align: center; width: 40px">
+            <mat-checkbox
+              [checked]="isAllSelected()"
+              (change)="toggleAll($event.checked)"
+              color="primary"
+            ></mat-checkbox>
+          </th>
           <th
-            *ngFor="let header of headers; let last = last"
-            scope="col"
+            *ngFor="let header of headers.slice(1); let last = last"
             [style.padding.px]="12"
-            style="text-align: center; padding-top: 16px; text-transform: uppercase;"
+            style="
+              text-align: center;
+              padding-top: 16px;
+              text-transform: uppercase;
+            "
             [style.border-right]="last ? 'none' : '1px solid #e5e7eb'"
           >
             {{ header }}
@@ -60,10 +72,17 @@
       <tbody>
         <tr
           *ngFor="let item of getPaginatedData()"
-          style="border-bottom: 1px solid #e5e7eb;"
+          style="border-bottom: 1px solid #e5e7eb"
         >
+          <td style="text-align: center">
+            <mat-checkbox
+              [checked]="isSelected(item)"
+              (change)="toggleOne(item, $event.checked)"
+              color="primary"
+            ></mat-checkbox>
+          </td>
           <td
-            *ngFor="let header of headers; let last = last"
+            *ngFor="let header of headers.slice(1); let last = last"
             [style.padding.px]="12"
             [style.border-right]="last ? 'none' : '1px solid #e5e7eb'"
           >
@@ -89,14 +108,41 @@
                   {{ item[header] }}
                 </span>
               </ng-container>
-              <ng-container *ngSwitchDefault>
-                {{ item[header] }}
-              </ng-container>
+              <ng-container *ngSwitchDefault> {{ item[header] }} </ng-container>
             </ng-container>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Row with dropdown aligned to left -->
+    <div
+      style="
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 12px;
+        margin-top: 20px;
+      "
+    >
+      <mat-form-field appearance="fill" style="width: 180px">
+        <mat-label>Set status to</mat-label>
+        <mat-select [(value)]="selectedStatus">
+          <mat-option *ngFor="let status of statusOptions" [value]="status">
+            {{ status }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="selectedItems.size === 0"
+        (click)="updateSelectedStatuses()"
+      >
+        Update
+      </button>
+    </div>
 
     <div
       style="
@@ -147,6 +193,6 @@
       </button>
     </div>
   </div>
-</div>
 
-<router-outlet />
+  <router-outlet />
+</div>
