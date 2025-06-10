@@ -8,6 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 
 @Component({
   selector: 'app-table',
@@ -24,7 +26,9 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
     MatCheckboxModule,
     MatCheckbox,
     MatSelect,
-    MatSelectModule
+    MatSelectModule,
+    MatTableModule,
+    MatSortModule
   ],
   templateUrl: './component.table.html',
   styleUrls: ['./component.table.css'],
@@ -150,7 +154,10 @@ export class Table {
 
   updateSelectedStatuses() {
     this.selectedItems.forEach(item => {
-      item.status = this.selectedStatus;
+      if (item.status !== this.selectedStatus) {
+        item.status = this.selectedStatus;
+        item.lastModified = new Date().toISOString();
+      }
     });
   }
 }
